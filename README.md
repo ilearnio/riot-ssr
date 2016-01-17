@@ -1,4 +1,6 @@
 # riot-ssr
+[![NPM Version][npm-image]][npm-url]
+[![Build Status][travis-image]][travis-url]
 
 Syncronous and asynchronous server-side rendering of RiotJS tags for Connect/Express
 
@@ -6,7 +8,7 @@ Syncronous and asynchronous server-side rendering of RiotJS tags for Connect/Exp
 
 ```js
 // server.js
-const app = require('connect') // or Express
+const app = require('connect') // or require('express')
 const riotSSR = require('riot-ssr')
 
 app.use(riotSSR())
@@ -42,7 +44,7 @@ For asynchronous SSR you need to run `this.asyncStart()` before all of your asyn
 </some-component>
 ```
 
-## More higher level approach
+## Higher level approach
 
 The previous example was a really low-level. It is recommended that you would use the package with a mixin or by extending `riot.Tag` prototype.
 
@@ -72,3 +74,8 @@ riot.Tag.prototype.someAsyncFunction = function() {
   </script>
 </some-component>
 ```
+
+[npm-image]: https://img.shields.io/npm/v/riot-ssr.svg
+[npm-url]: https://npmjs.org/package/riot-ssr
+[travis-image]: https://img.shields.io/travis/ilearnio/riot-ssr/master.svg
+[travis-url]: https://travis-ci.org/ilearnio/riot-ssr
