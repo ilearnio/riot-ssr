@@ -17,6 +17,7 @@ app.use(riotSSR())
 app.use(function(req, res, next) {
   // synchronously
   let rendered = res.riotSSR.render('path/or/name/of/my.tag', opts)
+  res.end(rendered)
 
   // asynchronously
   res.riotSSR.renderAsync('path/or/name/of/my.tag', opts, function(rendered) {
@@ -46,7 +47,7 @@ For asynchronous SSR you need to run `this.asyncStart()` before all of your asyn
 
 ## Higher level approach
 
-The previous example was a really low-level. It is recommended that you would use the package with a mixin or by extending `riot.Tag` prototype.
+The previous example was a really low-level. It is recommended that you would create a mixin or extend `riot.Tag` prototype.
 
 Here is how I'm personally using it:
 
