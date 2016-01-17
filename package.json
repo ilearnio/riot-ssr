@@ -1,7 +1,7 @@
 {
   "name": "riot-ssr",
-  "version": "0.0.2",
-  "description": "Syncronous and asynchronous server-side rendering of RiotJS tags for Connect/Express",
+  "version": "0.0.3",
+  "description": "Synchronous and asynchronous server-side rendering of RiotJS tags for Connect/Express",
   "main": "index.js",
   "scripts": {
     "test": "mocha test/specs.js"

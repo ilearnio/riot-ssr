@@ -6,16 +6,6 @@ const riotSSR = require('..')
 const sync_tag_path = __dirname + '/tags/sync.js'
 const async_tag_path = __dirname + '/tags/async.js'
 
-var pretendServer = function(callback, callback2) {
-  var req = {}
-  var res = {}
-  var next = function() {}
-
-  callback(req, res, next)
-  callback2(req, res, next)
-}
-
-
 describe('riot-ssr', function() {
   it('should render asynchronously', function(done) {
     pretendServer(riotSSR(), function(req, res) {
@@ -43,3 +33,13 @@ describe('riot-ssr', function() {
     })
   })
 })
+
+
+function pretendServer(callback, callback2) {
+  var req = {}
+  var res = {}
+  var next = function() {}
+
+  callback(req, res, next)
+  callback2(req, res, next)
+}

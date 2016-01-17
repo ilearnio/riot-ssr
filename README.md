@@ -2,7 +2,7 @@
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
 
-Syncronous and asynchronous server-side rendering of RiotJS tags for Connect/Express
+Synchronous and asynchronous server-side rendering of RiotJS tags for Connect/Express. Works well with nested tags and multiple async actions
 
 ## Usage example
 
@@ -28,7 +28,7 @@ app.use(function(req, res, next) {
 app.listen(3000)
 ```
 
-For asynchronous SSR you need to run `this.asyncStart()` before all of your async actions and `this.asyncEnd()` after each of them (or better see higher level approach below)
+For asynchronous `renderAsync` you need to run `this.asyncStart()` before every async action in your tags and `this.asyncEnd()` once they are ready (or better see higher level approach below)
 
 ```html
 // some-component.tag

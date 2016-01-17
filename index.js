@@ -104,7 +104,7 @@ function setupAsyncListener() {
   riot.Tag.prototype.asyncEnd = () => {
     this.async_counter--
 
-    // Все асинхр действия выполнены
+    // All async actions are completed
     if (this.async_counter === 0) {
       ready.call(this)
     }
