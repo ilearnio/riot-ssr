@@ -1,6 +1,6 @@
 # riot-ssr
 
-Server-side rendering of Riot tags. Supports both synchronous and asynchronous methods.
+Syncronous and asynchronous server-side rendering of RiotJS tags for Connect/Express
 
 ## Usage example
 
