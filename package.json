@@ -1,0 +1,37 @@
+{
+  "name": "riot-ssr",
+  "version": "0.0.1",
+  "description": "Syncronous and asynchronous server-side rendering using RiotJS for Connect/Express",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/specs.js"
+  },
+  "engines": {
+    "node": ">=5.0.0"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "riotjs",
+    "riot",
+    "ssr",
+    "server side rendering"
+  ],
+  "author": {
+    "name": "Nikita Gavrilov",
+    "url": "https://github.com/ilearnio"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ilearnio/riot-ssr.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "riot": "^2.3.13"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4"
+  }
+}
