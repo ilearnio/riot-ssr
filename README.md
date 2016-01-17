@@ -34,18 +34,18 @@ app.use(function(req, res, next) {
 app.listen(3000)
 ```
 
-For asynchronous `renderAsync` you need to run `this.asyncStart()` before every async action in your tags and `this.asyncEnd()` once they are ready (or better see higher level approach below)
+For asynchronous `renderAsync` you need to run `this.asyncStart()` before every async action in your tags and `asyncEnd()` once they are ready (or better see higher level approach below)
 
 ```html
 // some-component.tag
 <some-component>
   <p>{ result }</p>
   <script>
-    this.asyncStart() // registering a new async action and waiting until it's finished
+    const asyncEnd = this.asyncStart() // registering a new async action and waiting until it's finished
     someAsyncFunction(result => {
       this.result = result
       this.update() // updating the tag
-      this.asyncEnd() // async action is completed
+      asyncEnd() // async action is completed
     })
   </script>
 </some-component>
@@ -60,12 +60,12 @@ Here is how I'm personally using it:
 ```js
 // add `someAsyncFunction` method to every tag
 riot.Tag.prototype.someAsyncFunction = function(callback) {
-  this.asyncStart()
+  const asyncEnd = this.asyncStart()
 
   // Something async
   setTimeout(() => {
     callback()
-    this.asyncEnd()
+    asyncEnd()
   }, 10)
 }
 ```

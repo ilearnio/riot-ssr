@@ -90,23 +90,25 @@ function ready() {
 }
 
 function setupAsyncListener() {
-  this.ready = false
+  let self = this
 
-  this.async_counter = 0
+  self.ready = false
+
+  self.async_counter = 0
 
   // Use `this.asyncStart()` in your tags to register every async action
   riot.Tag.prototype.asyncStart = () => {
-    this.ready = false
-    this.async_counter++
-  }
+    self.ready = false
+    self.async_counter++
 
-  // After async action is completed/failed, do `this.asyncEnd()` in your tags
-  riot.Tag.prototype.asyncEnd = () => {
-    this.async_counter--
+    // After async action is completed/failed, do `asyncEnd()` in your tags
+    return function asyncEnd() {
+      self.async_counter--
 
-    // All async actions are completed
-    if (this.async_counter === 0) {
-      ready.call(this)
+      // All async actions are completed
+      if (self.async_counter === 0) {
+        ready.call(self)
+      }
     }
   }
 }
