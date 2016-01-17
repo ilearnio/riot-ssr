@@ -1,6 +1,6 @@
 {
   "name": "riot-ssr",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Synchronous and asynchronous server-side rendering of RiotJS tags for Connect/Express",
   "main": "index.js",
   "scripts": {

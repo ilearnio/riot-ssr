@@ -4,6 +4,12 @@
 
 Synchronous and asynchronous server-side rendering of RiotJS tags for Connect/Express. Works well with nested tags and multiple async actions
 
+## Installation
+
+```
+npm install --save riot-ssr
+```
+
 ## Usage example
 
 ```js
@@ -45,19 +51,20 @@ For asynchronous `renderAsync` you need to run `this.asyncStart()` before every 
 </some-component>
 ```
 
-## Higher level approach
+### Higher level approach
 
-The previous example was a really low-level. It is recommended that you would create a mixin or extend `riot.Tag` prototype.
+The previous example is a really low-level. It is recommended that you would create a mixin or extend `riot.Tag` prototype.
 
 Here is how I'm personally using it:
 
 ```js
 // add `someAsyncFunction` method to every tag
-riot.Tag.prototype.someAsyncFunction = function() {
+riot.Tag.prototype.someAsyncFunction = function(callback) {
   this.asyncStart()
 
   // Something async
   setTimeout(() => {
+    callback()
     this.asyncEnd()
   }, 10)
 }
