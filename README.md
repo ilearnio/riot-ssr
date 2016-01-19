@@ -24,7 +24,7 @@ render('path/or/name/of/my.tag', opts, function(rendered) {
 })
 ```
 
-In order to make the renderer to wait untill all of your asynchronous stuff will be completed, you need to run `this.asyncStart()` before your async calls and `this.asyncEnd()` after they are ready (or better see higher level approach below)
+In order to make the renderer to wait untill all of your asynchronous stuff will be completed, you need to run `this.asyncStart()` before your async calls and `this.asyncEnd()` after they are ready (or better see higher level approach below). You can use this functions as many times you want, for your every async call, but they must to always go together.
 
 ```html
 <some-component>

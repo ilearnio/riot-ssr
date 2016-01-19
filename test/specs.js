@@ -69,9 +69,8 @@ describe('riot-ssr', function() {
 
         render(long_running_tag, {}, function(result) {
           expect(result).to.equal('<long-running><p>ok</p></long-running>')
+          if (i === 10) done()
         })
-
-        if (i === 10) done()
 
       }, timeout)
     }

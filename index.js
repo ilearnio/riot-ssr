@@ -24,8 +24,7 @@ function render(tag_path, opts, callback) {
     return _render(tag)
   } else {
     var tag = createAsyncTag(tag_path, opts, function() {
-      var rendered = _render(tag)
-      callback(rendered)
+      callback(_render(tag))
     })
     tag.mount()
   }
@@ -146,10 +145,10 @@ function withChildren(tag) {
  */
 
 function getChildrenTags(tag) {
-  var result = []
+  var result = [], child
 
   for (var tag_name in tag.tags) {
-    var child = tag.tags[tag_name]
+    child = tag.tags[tag_name]
 
     result.push(child)
 
