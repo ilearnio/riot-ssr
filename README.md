@@ -2,7 +2,7 @@
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
 
-Synchronous and asynchronous server-side rendering of RiotJS tags for Connect/Express. Works well with nested tags and multiple async actions
+Synchronous/Asynchronous server-side rendering of RiotJS tags. Works well with nested tags and multiple async calls. Great test coverage
 
 ## Installation
 
@@ -13,39 +13,28 @@ npm install --save riot-ssr
 ## Usage example
 
 ```js
-// server.js
-const app = require('connect') // or require('express')
-const riotSSR = require('riot-ssr')
+const render = require('riot-ssr')
 
-app.use(riotSSR())
+// synchronously
+let rendered = render('path/or/name/of/my.tag', opts)
 
-// Now the `riotSSR` object is available in `res`
-app.use(function(req, res, next) {
-  // synchronously
-  let rendered = res.riotSSR.render('path/or/name/of/my.tag', opts)
-  res.end(rendered)
-
-  // asynchronously
-  res.riotSSR.renderAsync('path/or/name/of/my.tag', opts, function(rendered) {
-    res.end(rendered)
-  })
+// asynchronously (can be used for sync tags as well)
+render('path/or/name/of/my.tag', opts, function(rendered) {
+  // ... do something with `rendered`
 })
-
-app.listen(3000)
 ```
 
-For asynchronous `renderAsync` you need to run `this.asyncStart()` before every async action in your tags and `asyncEnd()` once they are ready (or better see higher level approach below)
+In order to make the renderer to wait untill all of your asynchronous stuff will be completed, you need to run `this.asyncStart()` before your async calls and `this.asyncEnd()` after they are ready (or better see higher level approach below)
 
 ```html
-// some-component.tag
 <some-component>
   <p>{ result }</p>
   <script>
-    const asyncEnd = this.asyncStart() // registering a new async action and waiting until it's finished
+    this.asyncStart() // registering a new async call and waiting until it's finished
     someAsyncFunction(result => {
       this.result = result
       this.update() // updating the tag
-      asyncEnd() // async action is completed
+      this.asyncEnd() // async call is completed
     })
   </script>
 </some-component>
@@ -60,12 +49,12 @@ Here is how I'm personally using it:
 ```js
 // add `someAsyncFunction` method to every tag
 riot.Tag.prototype.someAsyncFunction = function(callback) {
-  const asyncEnd = this.asyncStart()
+  this.asyncStart()
 
   // Something async
   setTimeout(() => {
-    callback()
-    asyncEnd()
+    callback('Hello world!')
+    this.asyncEnd()
   }, 10)
 }
 ```
@@ -76,7 +65,7 @@ riot.Tag.prototype.someAsyncFunction = function(callback) {
   <script>
     // no `asyncStart` or `asyncEnd` required
     this.someAsyncFunction(result => {
-      this.result = result
+      this.result = result // -> 'Hello world!'
       this.update()
     })
   </script>

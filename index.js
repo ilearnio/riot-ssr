@@ -1,61 +1,44 @@
-'use strict'
-
-const riot = require('riot')
-const sdom = require('riot/lib/server/sdom')
+var riot = require('riot')
+var sdom = require('riot/lib/server/sdom')
 require('riot/lib/server') // support for .tag files
 
 /**
- * Render synchronously
+ * Render a tag synchronously or asynchronously.
+ * Runs asynchronously if a callback is passed
+ *
+ * @param {string} tag_path
+ * @param {object} opts
+ * @param {function} callback (optional)
+ * @returns {string|void} html
  */
-function render(tag_path, opts) {
-  const tag = createTag(tag_path, opts)
-  return _render(tag)
-}
 
-/**
- * Render asynchronously
- */
-function renderAsync(tag_path, opts, callback) {
-  setupAsyncListener.call(this)
+function render(tag_path, opts, callback) {
+  opts = opts || {}
 
-  const tag = createTag(tag_path, opts)
+  if (typeof opts == 'function')
+    callback = opts
 
-  this._onReady(function() {
-    const rendered = _render(tag)
-    callback(rendered)
-  })
-}
-
-/**
- * Require tag if path is given
- */
-function requireTag(tag_path) {
-  let tag_name = tag_path
-
-  if (~tag_name.indexOf('/')) {
-    tag_name = require(tag_name)
-    tag_name = tag_name.default || tag_name
+  if (typeof callback !== 'function') {
+    var tag = createTag(tag_path, opts)
+    tag.mount()
+    return _render(tag)
+  } else {
+    var tag = createAsyncTag(tag_path, opts, function() {
+      var rendered = _render(tag)
+      callback(rendered)
+    })
+    tag.mount()
   }
-
-  return tag_name
-}
-
-/**
- * Create tag instance
- */
-function createTag(tag_path, opts) {
-  const tag_name = requireTag(tag_path)
-  const root = document.createElement(tag_name)
-  const tag = riot.mount(root, opts)[0]
-
-  return tag
 }
 
 /**
  * Render tag instance
+ *
+ * @returns {string} html
  */
+
 function _render(tag) {
-  const html = sdom.serialize(tag.root)
+  var html = sdom.serialize(tag.root)
 
   // unmount the tag avoiding memory leaks
   tag.unmount()
@@ -64,61 +47,116 @@ function _render(tag) {
 }
 
 /**
- * Listen for ready enents
+ * Require tag if path is given
+ *
+ * @param {string} tag_path
+ * @returns {string} tag_name
  */
-function _onReady(callback) {
-  let stack = this._onready_stack = this._onready_stack || []
 
-  stack.push(callback)
+function requireTag(tag_path) {
+  var tag_name = tag_path
 
-  if (this.ready || this.async_counter === 0) {
-    ready.call(this)
+  if (~tag_path.indexOf('/')) {
+    tag_name = require(tag_path)
+    tag_name = tag_name.default || tag_name
   }
+
+  return tag_name
 }
 
 /**
- * Fire ready event now
+ * Create tag instance
+ *
+ * @param {string} tag_path
+ * @param {object} opts
  */
-function ready() {
-  this.ready = true
 
-  if (this._onready_stack && this._onready_stack.length) {
-    while (this._onready_stack[0]) {
-      this._onready_stack.shift()()
-    }
-  }
+function createTag(tag_path, opts) {
+  var tag_name = requireTag(tag_path)
+  var root = document.createElement(tag_name)
+  var tag = riot.mount(root, opts)[0]
+
+  return tag
 }
 
-function setupAsyncListener() {
-  let self = this
+/**
+ * Create asynchronous tag instance
+ *
+ * @param {string} tag_path
+ * @param {object} opts
+ * @param {function} onReady callback
+ */
 
-  self.ready = false
+function createAsyncTag(tag_path, opts, onReady) {
+  var root_tag = createTag(tag_path)
 
-  self.async_counter = 0
+  // the root counter of async calls
+  var root_async_counter = 0
 
-  // Use `this.asyncStart()` in your tags to register every async action
-  riot.Tag.prototype.asyncStart = () => {
-    self.ready = false
-    self.async_counter++
+  var ready_fired = false
 
-    // After async action is completed/failed, do `asyncEnd()` in your tags
-    return function asyncEnd() {
-      self.async_counter--
+  withChildren(root_tag).forEach(function(tag) {
+    // counter of async calls for the current tag
+    var async_counter = 0
 
-      // All async actions are completed
-      if (self.async_counter === 0) {
-        ready.call(self)
+    tag.asyncStart = function() {
+      root_async_counter++
+      async_counter++
+    }
+
+    tag.asyncEnd = function() {
+      root_async_counter--
+      async_counter--
+
+      if (async_counter === 0 && root_async_counter === 0) {
+        // All async actions are completed
+        onReady()
+        ready_fired = true
       }
     }
-  }
+  })
+
+  // In case there was no `asyncStart` or `asyncEnd` calls in tags
+  process.nextTick(function() {
+    if (!ready_fired && root_async_counter === 0) {
+      onReady()
+    }
+  })
+
+  return root_tag
 }
 
-module.exports = function() {
-  return function(req, res, next) {
-    res.riotSSR = {}
-    res.riotSSR.render = render
-    res.riotSSR.renderAsync = renderAsync
-    res.riotSSR._onReady = _onReady
-    next()
-  }
+/**
+ * Returns an array of tags that contains the given tag and
+ * all of it's children
+ *
+ * @param {Tag} instance
+ * @returns {array}
+ */
+
+function withChildren(tag) {
+  return [tag].concat(getChildrenTags(tag))
 }
+
+/**
+ * Returns all children tags of the given tag recursively
+ *
+ * @param {Tag} instance
+ * @returns {array}
+ */
+
+function getChildrenTags(tag) {
+  var result = []
+
+  for (var tag_name in tag.tags) {
+    var child = tag.tags[tag_name]
+
+    result.push(child)
+
+    result.concat(getChildrenTags(child))
+  }
+
+  return result
+}
+
+module.exports = render
