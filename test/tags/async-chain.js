@@ -1,21 +1,23 @@
 var riot = require('riot/riot.js')
 
 module.exports = riot.tag('async-chain', '{value}', function(opts) {
-  this.asyncStart()
-  this.asyncEnd()
+  var self = this
 
-  this.asyncStart()
-  this.asyncEnd()
+  self.asyncStart()
+  self.asyncEnd()
 
-  this.asyncStart()
-  setTimeout(() => {
-    this.asyncEnd()
+  self.asyncStart()
+  self.asyncEnd()
 
-    this.asyncStart()
-    setTimeout(() => {
-      this.value = 'ok'
-      this.update()
-      this.asyncEnd()
+  self.asyncStart()
+  setTimeout(function() {
+    self.asyncEnd()
+
+    self.asyncStart()
+    setTimeout(function() {
+      self.value = 'ok'
+      self.update()
+      self.asyncEnd()
     }, 10)
   }, 10)
 })
