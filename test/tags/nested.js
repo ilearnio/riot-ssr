@@ -2,8 +2,7 @@ var riot = require('riot/riot.js')
 require('./sync')
 require('./async')
 
-module.exports = riot.tag('nested',
-  '<div><sync></sync><async></async>{value}</div>',
+module.exports = riot.tag('nested', '<sync></sync><async></async>{value}',
   function(opts) {
     var self = this
     self.value = ''

@@ -15,18 +15,30 @@ require('riot/lib/server') // support for .tag files
 function render(tag_path, opts, callback) {
   opts = opts || {}
 
-  if (typeof opts == 'function')
+  if (typeof opts == 'function') {
     callback = opts
+    opts = {}
+  }
 
-  if (typeof callback !== 'function') {
-    var tag = createTag(tag_path, opts)
-    tag.mount()
-    return _render(tag)
+  var async = typeof callback === 'function'
+
+  var tag = createTag(tag_path, opts, async && onReady)
+
+  if (async) {
+    // In case there was no `asyncStart` or `asyncEnd`
+    // calls in tags. They must be fired at least once
+    if (!root.ssr) {
+      tag.asyncStart()
+      tag.asyncEnd()
+    }
   } else {
-    var tag = createAsyncTag(tag_path, opts, function() {
-      callback(_render(tag))
-    })
-    tag.mount()
+    return _render(tag)
+  }
+
+  function onReady() {
+    if (!tag) return setImmediate(onReady)
+
+    callback(_render(tag))
   }
 }
 
@@ -43,6 +55,67 @@ function _render(tag) {
   tag.unmount()
 
   return html
+}
+
+/**
+ * Creates and mounts a tag instance
+ *
+ * @param {string} tag_path
+ * @returns {string} html
+ */
+
+function createTag(tag_path, opts, onReady) {
+  if (onReady) {
+    //
+    // Extend `riot.Tag.prototype` first, so that it would
+    // contain required `asyncStart` and `asyncEnd`
+    //
+
+    riot.Tag.prototype.asyncStart = function() {
+      var root = getRootTag(this)
+
+      // Use the root tag as the storage, which will be set
+      // up once when `asyncStart` will be called for the
+      // first time
+      if (!root.ssr) {
+        root.ssr = root.ssr || {
+          async_counter: 0,
+          onReady: onReady,
+          ready: false
+        }
+      }
+
+      if (root.ssr.ready) {
+        throw Error('Calling `tag.asyncStart()` after rendered result was ' +
+          'already returned')
+      }
+
+      root.ssr.async_counter++
+    }
+
+    if (!riot.Tag.prototype.asyncEnd) {
+      riot.Tag.prototype.asyncEnd = function() {
+        var root = getRootTag(this)
+
+        if (root.ssr.ready) return
+
+        root.ssr.async_counter--
+
+        setImmediate(function() {
+          if (!root.ssr.ready && root.ssr.async_counter === 0) {
+            // All async actions are completed
+            root.ssr.onReady()
+            root.ssr.ready = true
+          }
+        })
+      }
+    }
+  }
+
+  var tag_name = requireTag(tag_path)
+  var root = document.createElement(tag_name)
+
+  return riot.mount(root, opts)[0]
 }
 
 /**
@@ -64,98 +137,18 @@ function requireTag(tag_path) {
 }
 
 /**
- * Create tag instance
- *
- * @param {string} tag_path
- * @param {object} opts
- */
-
-function createTag(tag_path, opts) {
-  var tag_name = requireTag(tag_path)
-  var root = document.createElement(tag_name)
-  var tag = riot.mount(root, opts)[0]
-
-  return tag
-}
-
-/**
- * Create asynchronous tag instance
- *
- * @param {string} tag_path
- * @param {object} opts
- * @param {function} onReady callback
- */
-
-function createAsyncTag(tag_path, opts, onReady) {
-  var root_tag = createTag(tag_path)
-
-  // the root counter of async calls
-  var root_async_counter = 0
-
-  var ready_fired = false
-
-  withChildren(root_tag).forEach(function(tag) {
-    // counter of async calls for the current tag
-    var async_counter = 0
-
-    tag.asyncStart = function() {
-      root_async_counter++
-      async_counter++
-    }
-
-    tag.asyncEnd = function() {
-      root_async_counter--
-      async_counter--
-
-      if (async_counter === 0 && root_async_counter === 0) {
-        // All async actions are completed
-        onReady()
-        ready_fired = true
-      }
-    }
-  })
-
-  // In case there was no `asyncStart` or `asyncEnd` calls in tags
-  process.nextTick(function() {
-    if (!ready_fired && root_async_counter === 0) {
-      onReady()
-    }
-  })
-
-  return root_tag
-}
-
-/**
- * Returns an array of tags that contains the given tag and
- * all of it's children
+ * Returns the root tag of a given tag
  *
  * @param {Tag} instance
- * @returns {array}
+ * @returns {Tag} instance
  */
 
-function withChildren(tag) {
-  return [tag].concat(getChildrenTags(tag))
-}
-
-/**
- * Returns all children tags of the given tag recursively
- *
- * @param {Tag} instance
- * @returns {array}
- */
-
-function getChildrenTags(tag) {
-  var result = [], child
-
-  for (var tag_name in tag.tags) {
-    child = tag.tags[tag_name]
-
-    result.push(child)
-
-    result.concat(getChildrenTags(child))
+function getRootTag(tag) {
+  while (tag.parent) {
+    tag = tag.parent
   }
 
-  return result
+  return tag
 }
 
 module.exports = render

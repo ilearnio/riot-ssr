@@ -3,7 +3,9 @@ var expect = require('chai').expect
 
 var sync_tag = __dirname + '/tags/sync.js'
 var async_tag = __dirname + '/tags/async.js'
+var mount_tag = __dirname + '/tags/mount.js'
 var nested_tag = __dirname + '/tags/nested.js'
+var async_chain = __dirname + '/tags/async-chain.js'
 var long_running_tag = __dirname + '/tags/long-running.js'
 
 
@@ -11,39 +13,39 @@ describe('riot-ssr', function() {
 
   it('should render asynchronously', function(done) {
     render(async_tag, {}, function(result) {
-      expect(result).to.equal('<async><p>ok</p></async>')
+      expect(result).to.equal('<async>ok</async>')
       done()
     })
   })
 
   it('should render synchronously', function(done) {
     var result = render(sync_tag, {})
-    expect(result).to.equal('<sync><p>ok</p></sync>')
+    expect(result).to.equal('<sync>ok</sync>')
     done()
   })
 
   it('should render synchronously when a callback is given', function(done) {
     render(sync_tag, {}, function(result) {
-      expect(result).to.equal('<sync><p>ok</p></sync>')
+      expect(result).to.equal('<sync>ok</sync>')
       done()
     })
   })
 
   it('should work with just a tag name given (instead of full path)', function(done) {
     var result = render('sync', {})
-    expect(result).to.equal('<sync><p>ok</p></sync>')
+    expect(result).to.equal('<sync>ok</sync>')
     done()
   })
 
   it('should allow to skip opts argument', function(done) {
     var result = render(sync_tag)
-    expect(result).to.equal('<sync><p>ok</p></sync>')
+    expect(result).to.equal('<sync>ok</sync>')
     done()
   })
 
   it('should allow to use callback as second argument', function(done) {
     render(async_tag, function(result) {
-      expect(result).to.equal('<async><p>ok</p></async>')
+      expect(result).to.equal('<async>ok</async>')
       done()
     })
   })
@@ -51,7 +53,23 @@ describe('riot-ssr', function() {
   it('should support nested tags with multiple async calls', function(done) {
     render(nested_tag, {}, function(result) {
       expect(result).to.equal(
-        '<nested><div><sync><p>ok</p></sync><async><p>ok</p></async>ok</div></nested>'
+        '<nested><sync>ok</sync><async>ok</async>ok</nested>'
+      )
+      done()
+    })
+  })
+
+  it ('should wait until all async chain is finished', function(done) {
+    render(async_chain, {}, function(result) {
+      expect(result).to.equal('<async-chain>ok</async-chain>')
+      done()
+    })
+  })
+
+  it('should allow to `riot.mount()` a tag from inside of another tag', function(done) {
+    render(mount_tag, {}, function(result) {
+      expect(result).to.equal(
+        '<mount><div name="target" riot-tag="mount-child">ok<async>ok</async></div></mount>'
       )
       done()
     })
@@ -67,8 +85,9 @@ describe('riot-ssr', function() {
 
       setTimeout(function() {
 
-        render(long_running_tag, {}, function(result) {
-          expect(result).to.equal('<long-running><p>ok</p></long-running>')
+        var opts = { value: timeout }
+        render(long_running_tag, opts, function(result) {
+          expect(result).to.equal('<long-running>' + timeout + '</long-running>')
           if (i === 10) done()
         })
 
