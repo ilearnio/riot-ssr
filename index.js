@@ -15,7 +15,7 @@ require('riot/lib/server') // support for .tag files
 function render(tag_path, opts, callback) {
   opts = opts || {}
 
-  if (typeof opts == 'function') {
+  if (typeof opts === 'function') {
     callback = opts
     opts = {}
   }
@@ -27,7 +27,7 @@ function render(tag_path, opts, callback) {
   if (async) {
     // In case there was no `asyncStart` or `asyncEnd`
     // calls in tags. They must be fired at least once
-    if (!root.ssr) {
+    if (!tag.ssr) {
       tag.asyncStart()
       tag.asyncEnd()
     }
