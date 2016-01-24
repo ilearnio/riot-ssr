@@ -2,7 +2,16 @@
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
 
-Synchronous/Asynchronous server-side rendering of RiotJS tags. Works well with nested tags and multiple async calls.
+Synchronous/Asynchronous server-side rendering of RiotJS tags.
+
+## Features
+
+* Supports nested tags
+* Supports multiple async calls and complex async chains
+* Correctly handles multiple simultanouse requests
+* Allows to `riot.mount()` tags from inside of another tags (see tests for example)
+* Great tests coverage
+
 
 ## Installation
 

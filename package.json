@@ -1,6 +1,6 @@
 {
   "name": "riot-ssr",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Synchronous/Asynchronous server-side rendering of RiotJS tags",
   "main": "index.js",
   "scripts": {

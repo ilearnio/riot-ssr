@@ -75,7 +75,7 @@ describe('riot-ssr', function() {
     })
   })
 
-  it('should handle long running simultaneous async calls', function(done) {
+  it('should handle long running simultanouse async calls', function(done) {
     this.timeout(5000)
 
     var timeout
