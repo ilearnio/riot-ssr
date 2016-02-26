@@ -2,6 +2,8 @@
 [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
 
+[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
 Synchronous/Asynchronous server-side rendering of RiotJS tags.
 
 ## Features
@@ -28,7 +30,7 @@ const render = require('riot-ssr')
 let rendered = render('path/or/name/of/my.tag', opts)
 
 // asynchronously (can be used for sync tags as well)
-render('path/or/name/of/my.tag', opts, function(rendered) {
+render('path/or/name/of/my.tag', opts, function (rendered) {
   // ... do something with `rendered`
 })
 ```
@@ -57,7 +59,7 @@ Here is how I'm personally using it:
 
 ```js
 // add `someAsyncFunction` method to every tag
-riot.Tag.prototype.someAsyncFunction = function(callback) {
+riot.Tag.prototype.someAsyncFunction = function (callback) {
   this.asyncStart()
 
   // Something async
@@ -73,7 +75,7 @@ riot.Tag.prototype.someAsyncFunction = function(callback) {
   <p>{ result }</p>
   <script>
     // no `asyncStart` or `asyncEnd` required
-    this.someAsyncFunction(result => {
+    this.someAsyncFunction((result) => {
       this.result = result // -> 'Hello world!'
       this.update()
     })

@@ -3,11 +3,11 @@ require('./sync')
 require('./async')
 
 module.exports = riot.tag('nested', '<sync></sync><async></async>{value}',
-  function(opts) {
+  function (opts) {
     var self = this
     self.value = ''
     self.asyncStart()
-    setTimeout(function() {
+    setTimeout(function () {
       self.value = 'ok'
       self.update()
       self.asyncEnd()

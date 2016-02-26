@@ -13,7 +13,7 @@ require('riot/lib/server') // support for .tag files
  * @returns {string|void} html
  */
 
-function render(tag_path, opts, callback) {
+function render (tag_path, opts, callback) {
   opts = opts || {}
 
   if (typeof opts === 'function') {
@@ -36,7 +36,7 @@ function render(tag_path, opts, callback) {
     return _render(tag)
   }
 
-  function onReady() {
+  function onReady () {
     if (!tag) return setImmediate(onReady)
 
     callback(_render(tag))
@@ -49,7 +49,7 @@ function render(tag_path, opts, callback) {
  * @returns {string} html
  */
 
-function _render(tag) {
+function _render (tag) {
   var html = sdom.serialize(tag.root)
 
   // unmount the tag avoiding memory leaks
@@ -65,14 +65,14 @@ function _render(tag) {
  * @returns {string} html
  */
 
-function createTag(tag_path, opts, onReady) {
+function createTag (tag_path, opts, onReady) {
   if (onReady) {
     //
     // Extend `riot.Tag.prototype` first, so that it would
     // contain required `asyncStart` and `asyncEnd`
     //
 
-    riot.Tag.prototype.asyncStart = function() {
+    riot.Tag.prototype.asyncStart = function () {
       var root = getRootTag(this)
 
       // Use the root tag as the storage, which will be set
@@ -95,14 +95,14 @@ function createTag(tag_path, opts, onReady) {
     }
 
     if (!riot.Tag.prototype.asyncEnd) {
-      riot.Tag.prototype.asyncEnd = function() {
+      riot.Tag.prototype.asyncEnd = function () {
         var root = getRootTag(this)
 
         if (root.ssr.ready) return
 
         root.ssr.async_counter--
 
-        setImmediate(function() {
+        setImmediate(function () {
           if (!root.ssr.ready && root.ssr.async_counter === 0) {
             // All async actions are completed
             root.ssr.onReady()
@@ -126,7 +126,7 @@ function createTag(tag_path, opts, onReady) {
  * @returns {string} tag_name
  */
 
-function requireTag(tag_path) {
+function requireTag (tag_path) {
   if (tag_path[0] === '.') {
     tag_path = path.join(module.parent.filename, '..', tag_path)
   }
@@ -148,7 +148,7 @@ function requireTag(tag_path) {
  * @returns {Tag} instance
  */
 
-function getRootTag(tag) {
+function getRootTag (tag) {
   while (tag.parent) {
     tag = tag.parent
   }

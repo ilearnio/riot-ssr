@@ -1,7 +1,7 @@
 var riot = require('riot/riot.js')
 require('./async')
 
-module.exports = riot.tag('mount', '<div name="target"></div>', function(opts) {
+module.exports = riot.tag('mount', '<div name="target"></div>', function (opts) {
   // It's important that the child tag will contain a
   // proper `parent` property which will reference to
   // the current tag
@@ -15,10 +15,11 @@ module.exports = riot.tag('mount', '<div name="target"></div>', function(opts) {
   child.update()
 })
 
-riot.tag('mount-child', '{value}<async></async>', function(opts) {
+riot.tag('mount-child', '{value}<async></async>', function (opts) {
   // Riot v2.3.13 bug: https://github.com/riot/riot/issues/1517
-  if (Object.keys(opts).length === 0
-    && opts.__proto__ && Object.keys(opts.__proto__).length) {
+  /* eslint-disable no-proto */
+  if (Object.keys(opts).length === 0 &&
+    opts.__proto__ && Object.keys(opts.__proto__).length) {
     opts = opts.__proto__
   }
 
@@ -31,7 +32,7 @@ riot.tag('mount-child', '{value}<async></async>', function(opts) {
   self.parent = opts.parent
 
   self.asyncStart()
-  setTimeout(function() {
+  setTimeout(function () {
     self.value = 'ok'
     self.update()
     self.asyncEnd()
