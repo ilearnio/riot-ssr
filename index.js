@@ -1,3 +1,4 @@
+var path = require('path')
 var riot = require('riot')
 var sdom = require('riot/lib/server/sdom')
 require('riot/lib/server') // support for .tag files
@@ -126,6 +127,10 @@ function createTag(tag_path, opts, onReady) {
  */
 
 function requireTag(tag_path) {
+  if (tag_path[0] === '.') {
+    tag_path = path.join(module.parent.filename, '..', tag_path)
+  }
+
   var tag_name = tag_path
 
   if (~tag_path.indexOf('/')) {

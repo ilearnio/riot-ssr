@@ -1,3 +1,5 @@
+/* eslint-env mocha */
+
 var render = require('..')
 var expect = require('chai').expect
 
@@ -8,9 +10,7 @@ var nested_tag = __dirname + '/tags/nested.js'
 var async_chain = __dirname + '/tags/async-chain.js'
 var long_running_tag = __dirname + '/tags/long-running.js'
 
-
 describe('riot-ssr', function() {
-
   it('should render asynchronously', function(done) {
     render(async_tag, {}, function(result) {
       expect(result).to.equal('<async>ok</async>')
@@ -95,4 +95,8 @@ describe('riot-ssr', function() {
     }
   })
 
+  it('should handle relative path', function() {
+    expect(render('./tags/sync.js')).to.equal('<sync>ok</sync>')
+    expect(render('../test/tags/sync.js')).to.equal('<sync>ok</sync>')
+  })
 })
