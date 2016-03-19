@@ -10,19 +10,12 @@ module.exports = riot.tag('mount', '<div name="target"></div>', function (opts) 
   var child = riot.mount(this.target, 'mount-child', _opts)[0]
 
   // it's important to update the child tag when we
-  // assigning custom parent, otherways Riot may not
-  // compile expressions in HTML
+  // assigning custom parent, otherways Riot may not compile
+  // expressions in HTML
   child.update()
 })
 
 riot.tag('mount-child', '{value}<async></async>', function (opts) {
-  // Riot v2.3.13 bug: https://github.com/riot/riot/issues/1517
-  /* eslint-disable no-proto */
-  if (Object.keys(opts).length === 0 &&
-    opts.__proto__ && Object.keys(opts.__proto__).length) {
-    opts = opts.__proto__
-  }
-
   var self = this
 
   self.value = ''
