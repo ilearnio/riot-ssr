@@ -7,12 +7,7 @@ module.exports = riot.tag('mount', '<div name="target"></div>', function (opts) 
   // reference to the current tag
   var _opts = { parent: this }
 
-  var child = riot.mount(this.target, 'mount-child', _opts)[0]
-
-  // it's important to update the child tag when we
-  // assigning custom parent, otherways Riot may not compile
-  // expressions in HTML
-  child.update()
+  riot.mount(this.target, 'mount-child', _opts)[0]
 })
 
 riot.tag('mount-child', '{value}<async></async>', function (opts) {
