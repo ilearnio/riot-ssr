@@ -19,10 +19,9 @@ describe('riot-ssr', function () {
     })
   })
 
-  it('should render synchronously', function (done) {
+  it('should render synchronously', function () {
     var result = render(sync_tag, {})
     expect(result).to.equal('<sync>ok</sync>')
-    done()
   })
 
   it('should render synchronously when a callback is given', function (done) {
@@ -32,16 +31,14 @@ describe('riot-ssr', function () {
     })
   })
 
-  it('should work with just a tag name given (instead of full path)', function (done) {
+  it('should work with just a tag name given (instead of full path)', function () {
     var result = render('sync', {})
     expect(result).to.equal('<sync>ok</sync>')
-    done()
   })
 
-  it('should allow to skip opts argument', function (done) {
+  it('should allow to skip opts argument', function () {
     var result = render(sync_tag)
     expect(result).to.equal('<sync>ok</sync>')
-    done()
   })
 
   it('should allow to use callback as second argument', function (done) {

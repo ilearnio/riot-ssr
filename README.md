@@ -4,14 +4,14 @@
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
-Synchronous/Asynchronous server-side rendering of RiotJS tags.
+Synchronous/Asynchronous server-side rendering of [RiotJS](http://riotjs.com) tags.
 
 ## Features
 
 * Supports nested tags
 * Supports multiple async calls and complex async chains
 * Correctly handles multiple simultanouse requests
-* Allows to `riot.mount()` tags from inside of another tags (see tests for example)
+* Allows to `riot.mount()` tags from inside of another tags ([see tests for example](https://github.com/ilearnio/riot-ssr/blob/master/test/tags/mount.js))
 * Great tests coverage
 
 
