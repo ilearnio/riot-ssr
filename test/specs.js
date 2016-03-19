@@ -67,7 +67,7 @@ describe('riot-ssr', function () {
   it('should allow to `riot.mount()` a tag from inside of another tag', function (done) {
     render(mount_tag, {}, function (result) {
       expect(result).to.equal(
-        '<mount><div name="target" riot-tag="mount-child">ok<async>ok</async></div></mount>'
+        '<mount><div name="target" data-is="mount-child">ok<async>ok</async></div></mount>'
       )
       done()
     })
