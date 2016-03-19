@@ -149,8 +149,8 @@ function requireTag (tag_path) {
  */
 
 function getRootTag (tag) {
-  while (tag.parent) {
-    tag = tag.parent
+  while (tag.parent || tag.opts.parent instanceof riot.Tag) {
+    tag = tag.parent || tag.opts.parent
   }
 
   return tag
