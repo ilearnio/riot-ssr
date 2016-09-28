@@ -7,13 +7,13 @@ require('riot/lib/server') // support for .tag files
  * Render a tag synchronously or asynchronously.
  * Runs asynchronously if a callback is passed
  *
- * @param {string} tag_path
- * @param {object} opts
- * @param {function} callback (optional)
- * @returns {string|void} html
+ * @param {String} tagPath
+ * @param {Object} opts
+ * @param {Function} callback (optional)
+ * @returns {String|Void} html
  */
 
-function render (tag_path, opts, callback) {
+function render (tagPath, opts, callback) {
   opts = opts || {}
 
   if (typeof opts === 'function') {
@@ -21,11 +21,11 @@ function render (tag_path, opts, callback) {
     opts = {}
   }
 
-  var async = typeof callback === 'function'
+  var isAsync = typeof callback === 'function'
 
-  var tag = createTag(tag_path, opts, async && onReady)
+  var tag = createTag(tagPath, opts, isAsync && onReady)
 
-  if (async) {
+  if (isAsync) {
     // In case there was no `asyncStart` or `asyncEnd`
     // calls in tags. They must be fired at least once
     if (!tag.ssr) {
@@ -38,17 +38,16 @@ function render (tag_path, opts, callback) {
 
   function onReady () {
     if (!tag) return setImmediate(onReady)
-
-    callback(_render(tag))
+    var rendered = _render(tag)
+    callback(rendered)
   }
 }
 
 /**
  * Render tag instance
  *
- * @returns {string} html
+ * @returns {String} html
  */
-
 function _render (tag) {
   var html = sdom.serialize(tag.root)
 
@@ -61,11 +60,11 @@ function _render (tag) {
 /**
  * Creates and mounts a tag instance
  *
- * @param {string} tag_path
- * @returns {string} html
+ * @param {String} tagPath
+ * @returns {String} html
  */
 
-function createTag (tag_path, opts, onReady) {
+function createTag (tagPath, opts, onReady) {
   if (onReady) {
     //
     // Extend `riot.Tag.prototype` first, so that it would
@@ -78,20 +77,18 @@ function createTag (tag_path, opts, onReady) {
       // Use the root tag as the storage, which will be set
       // up once when `asyncStart` will be called for the
       // first time
-      if (!root.ssr) {
-        root.ssr = root.ssr || {
-          async_counter: 0,
-          onReady: onReady,
-          ready: false
-        }
-      }
+      root.ssr || (root.ssr = {
+        asyncCounter: 0,
+        onReadyStack: [onReady],
+        ready: false
+      })
 
       if (root.ssr.ready) {
-        throw Error('Calling `tag.asyncStart()` after rendered result was ' +
-          'already returned')
+        throw new Error('Calling `tag.asyncStart()` after rendered result ' +
+          'was already returned')
       }
 
-      root.ssr.async_counter++
+      root.ssr.asyncCounter++
     }
 
     if (!riot.Tag.prototype.asyncEnd) {
@@ -100,12 +97,14 @@ function createTag (tag_path, opts, onReady) {
 
         if (root.ssr.ready) return
 
-        root.ssr.async_counter--
+        root.ssr.asyncCounter--
 
         setImmediate(function () {
-          if (!root.ssr.ready && root.ssr.async_counter === 0) {
+          if (!root.ssr.ready && root.ssr.asyncCounter === 0) {
             // All async actions are completed
-            root.ssr.onReady()
+            for (var i = 0; i < root.ssr.onReadyStack.length; i++) {
+              root.ssr.onReadyStack[i]()
+            }
             root.ssr.ready = true
           }
         })
@@ -113,32 +112,34 @@ function createTag (tag_path, opts, onReady) {
     }
   }
 
-  var tag_name = requireTag(tag_path)
-  var root = document.createElement(tag_name)
+  var tagName = requireTag(tagPath)
+  var root = document.createElement(tagName)
 
-  return riot.mount(root, opts)[0]
+  var tag = riot.mount(root, opts)[0]
+
+  return tag
 }
 
 /**
  * Require tag if path is given
  *
- * @param {string} tag_path
- * @returns {string} tag_name
+ * @param {String} tagPath
+ * @returns {String} tagName
  */
 
-function requireTag (tag_path) {
-  if (tag_path[0] === '.') {
-    tag_path = path.join(module.parent.filename, '..', tag_path)
+function requireTag (tagPath) {
+  if (tagPath[0] === '.') {
+    tagPath = path.join(module.parent.filename, '..', tagPath)
   }
 
-  var tag_name = tag_path
+  var tagName = tagPath
 
-  if (~tag_path.indexOf('/')) {
-    tag_name = require(tag_path)
-    tag_name = tag_name.default || tag_name
+  if (~tagPath.indexOf('/')) {
+    tagName = require(tagPath)
+    tagName = tagName.default || tagName
   }
 
-  return tag_name
+  return tagName
 }
 
 /**
