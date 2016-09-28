@@ -1,6 +1,6 @@
 {
   "name": "riot-ssr",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Synchronous/Asynchronous server-side rendering of RiotJS tags",
   "main": "index.js",
   "scripts": {
@@ -36,7 +36,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "just-compare": "^1.1.21",
     "riot": "^2.6.2"
   },
   "devDependencies": {
