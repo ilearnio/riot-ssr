@@ -4,7 +4,9 @@
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
-Synchronous/Asynchronous server-side rendering of [RiotJS](http://riotjs.com) tags.
+Synchronous/Asynchronous server-side rendering of [RiotJS](http://riotjs.com) tags. Based on the official `render` method from Riot's compiler.
+
+The entire idea of rendering tags asynchronously is based around two additional functions that it adds to your every tag by extending `riot.Tag.prototype`, those are `asyncStart` and `asyncEnd`. In order to make the renderer to wait untill your async code will be finished, you need to call `this.asyncStart()` before it starts and `this.asyncEnd()` respectively when it ends. You can call these functions as many times you want in all your tags, just remember that they must always go together. If you started an async action it should be ended, otherways it will wait for it forever.
 
 ## Features
 
@@ -13,7 +15,6 @@ Synchronous/Asynchronous server-side rendering of [RiotJS](http://riotjs.com) ta
 * Correctly handles multiple simultanouse requests
 * Allows to `riot.mount()` tags from inside of another tags ([see tests for example](https://github.com/ilearnio/riot-ssr/blob/master/test/tags/mount.js))
 * Great tests coverage
-
 
 ## Installation
 
@@ -26,26 +27,21 @@ npm install --save riot-ssr
 ```js
 const render = require('riot-ssr')
 
-// synchronously
-let rendered = render('path/or/name/of/my.tag', opts)
-
-// asynchronously (can be used for sync tags as well)
+// Render asynchronously (can be used for sync tags as well)
 render('path/or/name/of/my.tag', opts, function (rendered) {
   // ... do something with `rendered`
 })
 ```
 
-In order to make the renderer to wait untill all of your asynchronous stuff will be completed, you need to run `this.asyncStart()` before your async calls and `this.asyncEnd()` after they are ready (or better see higher level approach below). You can use this functions as many times you want (for your every async call), but they must to always go together.
-
 ```html
 <some-component>
   <p>{ result }</p>
   <script>
-    this.asyncStart() // registering a new async call and waiting until it's finished
+    if (IS_SERVER) this.asyncStart() // registering a new async call and waiting until it's finished
     someAsyncFunction(result => {
       this.result = result
       this.update() // updating the tag
-      this.asyncEnd() // async call is completed
+      if (IS_SERVER) this.asyncEnd() // async call is completed
     })
   </script>
 </some-component>
@@ -53,19 +49,17 @@ In order to make the renderer to wait untill all of your asynchronous stuff will
 
 ### Higher level approach
 
-The previous example is a really low-level. It is recommended that you would create a mixin or extend `riot.Tag` prototype.
-
-Here is how I'm personally using it:
+The previous example is kind of low-level. It is recommended that you would create wrapper that would call `asyncStart` and `asyncEnd` for you. It can be a pure function, Riot mixin or whatever you think is best. Example:
 
 ```js
 // add `someAsyncFunction` method to every tag
-riot.Tag.prototype.someAsyncFunction = function (callback) {
-  this.asyncStart()
+function someAsyncFunction (tag, callback) {
+  if (IS_SERVER) tag.asyncStart()
 
   // Something async
   setTimeout(() => {
     callback('Hello world!')
-    this.asyncEnd()
+    if (IS_SERVER) tag.asyncEnd()
   }, 100)
 }
 ```
@@ -75,7 +69,7 @@ riot.Tag.prototype.someAsyncFunction = function (callback) {
   <p>{ result }</p>
   <script>
     // no `asyncStart` or `asyncEnd` required
-    this.someAsyncFunction((result) => {
+    someAsyncFunction(this, (result) => {
       this.result = result // -> 'Hello world!'
       this.update()
     })
